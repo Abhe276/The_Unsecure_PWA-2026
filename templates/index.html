@@ -27,6 +27,9 @@
 </form>
 <!-- User message -->
 {% if msg %}
-<div>{{ msg|safe }}</div>
+<!--Allowed any HTML or script passed through the msg parameter to run in the browser.
+FIX = Remove |safe filter
+Without |safe Jinja2 escapes all output as plain text by default-->
+<div>{{ msg }}</div>
 {% endif %}
 {% endblock %}
