@@ -1,15 +1,20 @@
 import sqlite3 as sql
 import time
 import random
+import bcrypt
 
 
 def insertUser(username, password, DoB):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
+    # Passwords were stored in plain text meaning anyone who accessed the database could read every password immediately
+    # FIX = Hash password with bcrypt before storing
+    # bcrypt applies a one way hash so even if the database is exposed passwords cannot be read directly
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     cur.execute(
         "INSERT INTO users (username,password,dateOfBirth) VALUES (?,?,?)",
-        (username, password, DoB),
-    )
+        (username, hashed_password, DoB),
+    ) 
     con.commit()
     con.close()
 
@@ -36,7 +41,15 @@ def retrieveUsers(username, password):
             file.write(str(number))
         # Simulate response time of heavy app for testing purposes
         time.sleep(random.randint(80, 90) / 1000)
-        if cur.fetchone() == None:
+        #The stored password is a bcrypt hash. checkpw hashes the submitted password and compare it
+        #FIX = Verify password using bcrypt instead of plain text comparison
+        #Plain text is never stored or compared
+        user_row = cur.fetchone()
+        if user_row is None:
+            con.close()
+            return False
+        stored_hash = user_row[2]
+        if not bcrypt.checkpw(password.encode('utf-8'), stored_hash):
             con.close()
             return False
         else:
