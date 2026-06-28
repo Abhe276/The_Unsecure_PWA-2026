@@ -17,12 +17,17 @@ def insertUser(username, password, DoB):
 def retrieveUsers(username, password):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM users WHERE username = '{username}'")
+    # inserted the username directly into the qurey, which means an attacker could type ' or '1'='1' into the login field and bypass authetication completly without needing a real password.
+    # FIX = Parameterise query replaces f-string concatenation. 
+    # the ? placeholder passes the username as a seperate data value so no matter what it contains it can never alter the query.
+    cur.execute("SELECT * FROM users WHERE username = ?", (username,))
     if cur.fetchone() == None:
         con.close()
         return False
     else:
-        cur.execute(f"SELECT * FROM users WHERE password = '{password}'")
+        # Same SQL injection vulnerability exists here on the password feild aswell
+        #FIX = Parameterise query replaces f-string concatenation
+        cur.execute("SELECT * FROM users WHERE password = ?", (password,))
         # Plain text log of visitor count as requested by Unsecure PWA management
         with open("visitor_log.txt", "r") as file:
             number = int(file.read().strip())
@@ -42,7 +47,9 @@ def retrieveUsers(username, password):
 def insertFeedback(feedback):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
-    cur.execute(f"INSERT INTO feedback (feedback) VALUES ('{feedback}')")
+    #An attacker could submit feedback containing a SQL such as '); DROP TABLE feedback; -- which would run againt the database and destroy all stored data. 
+    # The ? placeholder treats the entire feedback string as a plain data regardless of what SQL characters it contains
+    cur.execute("INSERT INTO feedback (feedback) VALUES (?)", (feedback,))
     con.commit()
     con.close()
 
