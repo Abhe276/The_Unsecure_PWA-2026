@@ -5,6 +5,11 @@ from flask import redirect
 from flask_cors import CORS
 import user_management as dbHandler
 
+
+#The url parameter was passed directly to redirect() with no validation. An attacker could craft a url and send it users to a malicious site using the legitimate PWA domain as cover.
+#FIX = Whitelist of permitted internal redirect destinations.
+ALLOWED_REDIRECTS = ['/', '/index.html', '/signup.html', '/success.html']
+
 # Code snippet for logging a message
 # app.logger.critical("message")
 
@@ -17,6 +22,10 @@ CORS(app)
 def addFeedback():
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
+        #Any external or unlisted URL defaults to home page instead of actually redirecting to unauthorised pages
+        #FIX=Only allow redirects to whitelisted internal paths
+        if url not in ALLOWED_REDIRECTS:
+            url = "/"
         return redirect(url, code=302)
     if request.method == "POST":
         feedback = request.form["feedback"]
@@ -32,6 +41,10 @@ def addFeedback():
 def signup():
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
+        #Any external or unlisted URL defaults to home page instead of actually redirecting to unauthorised pages
+        #FIX=Only allow redirects to whitelisted internal paths
+        if url not in ALLOWED_REDIRECTS:
+            url = "/"
         return redirect(url, code=302)
     if request.method == "POST":
         username = request.form["username"]
@@ -49,6 +62,10 @@ def home():
     # Simple Dynamic menu
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
+        #Any external or unlisted URL defaults to home page instead of actually redirecting to unauthorised pages
+        #FIX=Only allow redirects to whitelisted internal paths
+        if url not in ALLOWED_REDIRECTS:
+            url = "/"
         return redirect(url, code=302)
     # Pass message to front end
     elif request.method == "GET":
