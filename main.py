@@ -1,4 +1,6 @@
-from flask import Flask
+from flask import Flask, session
+from flask_wtf.csrf import CSRFProtect
+import os
 from flask import render_template
 from flask import request
 from flask import redirect
@@ -14,6 +16,13 @@ ALLOWED_REDIRECTS = ['/', '/index.html', '/signup.html', '/success.html']
 # app.logger.critical("message")
 
 app = Flask(__name__)
+#No CSRF protection. An attacker on another domain could build a hidden form that submitted to this app using a logged-in ser's session without their knowledge
+#FIX = Added secret key and CSRF protection
+#CSRFProtect generates a unique token for each session that must match every form submission
+app.secret_key = os.urandom(24)
+csrf = CSRFProtect(app)
+
+
 # Enable CORS to allow cross-origin requests (needed for CSRF demo in Codespaces)
 CORS(app)
 
