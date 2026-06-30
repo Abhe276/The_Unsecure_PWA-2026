@@ -26,7 +26,11 @@ csrf = CSRFProtect(app)
 
 
 # Enable CORS to allow cross-origin requests (needed for CSRF demo in Codespaces)
-CORS(app)
+
+
+#CORS(app) with no arguments allows requests from ANY origin
+#FIX = restrict CORS to trusted origins only
+CORS(app, origins=["http://127.0.0.1:5000", "http://localhost:5000"])
 
 
 @app.route("/success.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
