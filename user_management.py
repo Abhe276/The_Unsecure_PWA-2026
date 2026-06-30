@@ -2,6 +2,12 @@ import sqlite3 as sql
 import time
 import random
 import bcrypt
+import threading
+
+#The counter was read and written in seperate files operations with a time gap in between 
+#Two logins at the same time will cause a lost update
+#FIX = Thread lock for the visitor counter
+counter_lock = threading.Lock() 
 
 
 def insertUser(username, password, DoB):
@@ -34,13 +40,15 @@ def retrieveUsers(username, password):
         #FIX = Parameterise query replaces f-string concatenation
         cur.execute("SELECT * FROM users WHERE password = ?", (password,))
         # Plain text log of visitor count as requested by Unsecure PWA management
-        with open("visitor_log.txt", "r") as file:
-            number = int(file.read().strip())
-            number += 1
-        with open("visitor_log.txt", "w") as file:
-            file.write(str(number))
-        # Simulate response time of heavy app for testing purposes
-        time.sleep(random.randint(80, 90) / 1000)
+
+        #FIX=Lock prevents simultaneous access
+        #Sleep removed 
+        with counter_lock:
+            with open("visitor_log.txt", "r") as file:
+                number = int(file.read().strip())
+                number += 1
+            with open("visitor_log.txt", "w") as file:
+                file.write(str(number))
         #The stored password is a bcrypt hash. checkpw hashes the submitted password and compare it
         #FIX = Verify password using bcrypt instead of plain text comparison
         #Plain text is never stored or compared
