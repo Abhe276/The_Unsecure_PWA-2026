@@ -29,6 +29,10 @@ CORS(app)
 
 @app.route("/success.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
 def addFeedback():
+    #FIX = Protect this route by checking for a valid session
+    #If no session exists the user is rediected back to login page
+    if 'user' not in session:
+        return redirect('/')
     if request.method == "GET" and request.args.get("url"):
         url = request.args.get("url", "")
         #Any external or unlisted URL defaults to home page instead of actually redirecting to unauthorised pages
@@ -85,6 +89,10 @@ def home():
         password = request.form["password"]
         isLoggedIn = dbHandler.retrieveUsers(username, password)
         if isLoggedIn:
+            # No session was created after login, The success page is loaded for anyone who navigated to it directly without logging in.
+            # FIX = Store authenticated user in server side session
+            #Storing the user in session allows protected routes to verify authentication before providing with content
+            session['user'] = username
             dbHandler.listFeedback()
             return render_template("/success.html", value=username, state=isLoggedIn)
         else:
