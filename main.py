@@ -44,10 +44,10 @@ def addFeedback():
         feedback = request.form["feedback"]
         dbHandler.insertFeedback(feedback)
         dbHandler.listFeedback()
-        return render_template("/success.html", state=True, value="Back")
+        return render_template("/success.html", state=True, value=session['user'])
     else:
         dbHandler.listFeedback()
-        return render_template("/success.html", state=True, value="Back")
+        return render_template("/success.html", state=True, value=session['user'])
 
 
 @app.route("/signup.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
