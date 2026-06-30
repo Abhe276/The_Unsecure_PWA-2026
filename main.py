@@ -24,6 +24,13 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.secret_key = os.urandom(24)
 csrf = CSRFProtect(app)
 
+#With no X-Frame-Options or CSP header, this site could be embedded inside an invisible iframe on a malicious page
+#FIX = Add security headers to prevent clickjacking
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'none'"
+    return response
 
 # Enable CORS to allow cross-origin requests (needed for CSRF demo in Codespaces)
 
