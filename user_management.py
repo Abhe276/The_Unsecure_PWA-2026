@@ -32,15 +32,23 @@ def retrieveUsers(username, password):
     # FIX = Parameterise query replaces f-string concatenation. 
     # the ? placeholder passes the username as a seperate data value so no matter what it contains it can never alter the query.
     cur.execute("SELECT * FROM users WHERE username = ?", (username,))
-    if cur.fetchone() == None:
+    user_row = cur.fetchone()
+    if user_row is None:
         con.close()
         return False
     else:
-        # Same SQL injection vulnerability exists here on the password feild aswell
+        
         #FIX = Parameterise query replaces f-string concatenation
-        cur.execute("SELECT * FROM users WHERE password = ?", (password,))
         # Plain text log of visitor count as requested by Unsecure PWA management
 
+        #The stored password is a bcrypt hash. checkpw hashes the submitted password and compare it
+        #FIX = Verify password using bcrypt instead of plain text comparison
+        #Plain text is never stored or compared
+
+        stored_hash = user_row[2]
+        if not bcrypt.checkpw(password.encode('utf-8'), stored_hash):
+            con.close()
+            return False
         #FIX=Lock prevents simultaneous access
         #Sleep removed 
         with counter_lock:
@@ -49,20 +57,9 @@ def retrieveUsers(username, password):
                 number += 1
             with open("visitor_log.txt", "w") as file:
                 file.write(str(number))
-        #The stored password is a bcrypt hash. checkpw hashes the submitted password and compare it
-        #FIX = Verify password using bcrypt instead of plain text comparison
-        #Plain text is never stored or compared
-        user_row = cur.fetchone()
-        if user_row is None:
-            con.close()
-            return False
-        stored_hash = user_row[2]
-        if not bcrypt.checkpw(password.encode('utf-8'), stored_hash):
-            con.close()
-            return False
-        else:
-            con.close()
-            return True
+
+        con.close()
+        return True
 
 
 def insertFeedback(feedback):
