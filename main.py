@@ -16,6 +16,8 @@ ALLOWED_REDIRECTS = ['/', '/index.html', '/signup.html', '/success.html']
 # app.logger.critical("message")
 
 app = Flask(__name__)
+app.jinja_env.auto_reload = True
+app.config['TEMPLATES_AUTO_RELOAD'] = True 
 #No CSRF protection. An attacker on another domain could build a hidden form that submitted to this app using a logged-in ser's session without their knowledge
 #FIX = Added secret key and CSRF protection
 #CSRFProtect generates a unique token for each session that must match every form submission
