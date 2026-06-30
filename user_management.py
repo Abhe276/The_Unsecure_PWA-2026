@@ -3,6 +3,7 @@ import time
 import random
 import bcrypt
 import threading
+import html 
 
 #The counter was read and written in seperate files operations with a time gap in between 
 #Two logins at the same time will cause a lost update
@@ -80,6 +81,9 @@ def listFeedback():
     f = open("templates/partials/success_feedback.html", "w")
     for row in data:
         f.write("<p>\n")
-        f.write(f"{row[1]}\n")
+        #Raw feedback was written directly into the HTML file
+        #Any script tag submitted through the feedback form would execute
+        #FIX = Escape feedback content before writing to HTML to prevent stored XSS
+        f.write(f"{html.escape(row[1])}\n")
         f.write("</p>\n")
     f.close()
