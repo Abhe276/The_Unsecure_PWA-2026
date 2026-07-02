@@ -113,6 +113,13 @@ def home():
     else:
         return render_template("/index.html")
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+#Previously the logout link redirected to home without destroying the session
+#FIX = Proper logout clears the server side session entirely
+
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
